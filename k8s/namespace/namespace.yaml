@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: med-erp
+  labels:
+    app.kubernetes.io/name: med-erp
+    environment: production
+
+
+#helm install nginx-ingress . -n med-erp
