@@ -1,86 +1,74 @@
-// Backend — build, test; on main: Docker Hub/ECR login, push to ECR, deploy to EKS.
-//
-// In Jenkins: Manage Credentials → add these IDs exactly:
-//   aws-credentials   — AWS Credentials (ECR, STS)
-//   docker-registry     — Username + password (docker login before build; use Docker Hub token or your registry user)
-//   kubeconfig          — Secret file (kubectl context for the cluster)
-
-pipeline {
-    agent any
-
-    environment {
-        AWS_REGION    = 'us-east-1'
-        K8S_NAMESPACE = 'med-erp'
-        IMAGE_TAG     = "${env.GIT_COMMIT ? env.GIT_COMMIT.take(8) : "b${env.BUILD_NUMBER}"}"
+stage("Git") {
+    steps {
+        git url: "https://github.com/deepbijwe/Med-ERP-Code.git",
+            branch: "dev"
     }
+}
 
-    options {
-        timeout(time: 45, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '20'))
+stage("Test") {
+    steps {
+        sh '''
+            cd order-service
+            mvn test
+
+            cd ../user-service
+            mvn test
+
+            cd ../product-service
+            mvn test
+        '''
     }
+}
 
-    stages {
-        stage('Checkout') {
-            steps { checkout scm }
-        }
+stage("Build") {
+    steps {
+        sh '''
+            cd order-service
+            mvn clean compile -DskipTests
 
-        stage('Build & test') {
-            steps {
-                sh '''
-                    set -e
-                    for svc in user-service product-service order-service; do
-                      echo "=== $svc ==="
-                      (cd "$svc" && mvn -B clean verify)
-                    done
-                '''
-            }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-                }
-            }
-        }
+            cd ../user-service
+            mvn clean compile -DskipTests
 
-        stage('Docker push & deploy') {
-            when { branch 'main' }
-            steps {
-                withCredentials([
-                    [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: 'aws-credentials',
-                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-                    usernamePassword(credentialsId: 'docker-registry',
-                                     usernameVariable: 'DOCKER_USER',
-                                     passwordVariable: 'DOCKER_PASS'),
-                    file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')
-                ]) {
-                    sh '''
-                        set -e
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            cd ../product-service
+            mvn clean compile -DskipTests
+        '''
+    }
+}
 
-                        ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
-                        ECR_REGISTRY="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-                        aws ecr get-login-password --region "$AWS_REGION" | \
-                          docker login --username AWS --password-stdin "$ECR_REGISTRY"
-
-                        for svc in user-service product-service order-service; do
-                          docker build -t "$ECR_REGISTRY/med-erp/$svc:$IMAGE_TAG" \
-                            -t "$ECR_REGISTRY/med-erp/$svc:latest" "$svc/"
-                          docker push "$ECR_REGISTRY/med-erp/$svc:$IMAGE_TAG"
-                          docker push "$ECR_REGISTRY/med-erp/$svc:latest"
-                        done
-
-                        for svc in user-service product-service order-service; do
-                          kubectl set image "deployment/$svc" "$svc=$ECR_REGISTRY/med-erp/$svc:$IMAGE_TAG" -n "$K8S_NAMESPACE"
-                          kubectl rollout status "deployment/$svc" -n "$K8S_NAMESPACE" --timeout=5m
-                        done
-                    '''
-                }
-            }
+stage("Sonarqube-Quality-Analysis") {
+    steps {
+        withSonarQubeEnv("Sonar") {
+            sh '''
+                $SONAR_HOME/bin/sonar-scanner \
+                -Dsonar.projectName=MED-ERP \
+                -Dsonar.projectKey=MED-ERP \
+                -Dsonar.sources=. \
+                -Dsonar.java.binaries=order-service/target/classes,user-service/target/classes,product-service/target/classes
+            '''
         }
     }
+}
 
-    post {
-        always { cleanWs() }
+stage("OWASP Dependency Check") {
+    steps {
+        sh '''
+            dependency-check.sh \
+                --project "MED-ERP-order-service" \
+                --scan order-service \
+                --format HTML \
+                --out order-service/target/dependency-check
+
+            dependency-check.sh \
+                --project "MED-ERP-user-service" \
+                --scan user-service \
+                --format HTML \
+                --out user-service/target/dependency-check
+
+            dependency-check.sh \
+                --project "MED-ERP-product-service" \
+                --scan product-service \
+                --format HTML \
+                --out product-service/target/dependency-check
+        '''
     }
 }
