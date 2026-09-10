@@ -81,8 +81,20 @@ pipeline {
         dependencyCheckPublisher(
             pattern: '**/dependency-check-report.xml'
         )
+          }
+       }
+        stage("Trivy FS Scan") {
+    steps {
+        sh '''
+            trivy fs \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            .
+        '''
     }
 }
+
+
 
     
     }
