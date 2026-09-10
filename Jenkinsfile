@@ -58,28 +58,19 @@ pipeline {
             }
         }
 
-        stage("OWASP Dependency Check") {
-            steps {
-                sh '''
-                    dependency-check.sh \
-                        --project "MED-ERP-order-service" \
-                        --scan order-service \
-                        --format HTML \
-                        --out order-service/target/dependency-check
+       stage("OWASP Dependency Check") {
+    steps {
+        dependencyCheck(
+            additionalArguments: '--scan ./',
+            odcInstallation: 'OWASP-DC'
+        )
 
-                    dependency-check.sh \
-                        --project "MED-ERP-user-service" \
-                        --scan user-service \
-                        --format HTML \
-                        --out user-service/target/dependency-check
+        dependencyCheckPublisher(
+            pattern: '**/dependency-check-report.xml'
+        )
+    }
+}
 
-                    dependency-check.sh \
-                        --project "MED-ERP-product-service" \
-                        --scan product-service \
-                        --format HTML \
-                        --out product-service/target/dependency-check
-                '''
-            }
-        }
+
     }
 }
