@@ -96,5 +96,14 @@ pipeline {
                 '''
             }
         }
+        stage('Docker Build') {
+            steps {
+        sh '''
+            docker build -t deep/order-service:$BUILD_NUMBER ./order-service
+            docker build -t deep/user-service:$BUILD_NUMBER ./user-service
+            docker build -t deep/product-service:$BUILD_NUMBER ./product-service
+        '''
+            }
+        }
     }
-}
+}    
