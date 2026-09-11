@@ -96,6 +96,16 @@ pipeline {
                 '''
             }
         }
+        
+        stage('Cleanup') {
+    steps {
+        sh '''
+            docker image prune -af
+            docker container prune -f
+        '''
+    }
+}
+
         stage('Docker Build') {
             steps {
         sh '''
