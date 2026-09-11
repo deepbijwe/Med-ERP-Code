@@ -102,8 +102,32 @@ pipeline {
             docker build -t deep/order-service:$BUILD_NUMBER ./order-service
             docker build -t deep/user-service:$BUILD_NUMBER ./user-service
             docker build -t deep/product-service:$BUILD_NUMBER ./product-service
+            docker images
         '''
             }
         }
+stage('Trivy Image Scan') {
+    steps {
+        sh '''
+            trivy image --severity HIGH,CRITICAL --exit-code 0 --format table \
+                -o trivy-order-service-report.txt deep/order-service:$BUILD_NUMBER
+
+            trivy image --severity HIGH,CRITICAL --exit-code 0 --format table \
+                -o trivy-user-service-report.txt deep/user-service:$BUILD_NUMBER
+
+            trivy image --severity HIGH,CRITICAL --exit-code 0 --format table \
+                -o trivy-product-service-report.txt deep/product-service:$BUILD_NUMBER
+        '''
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'trivy-*-report.txt', allowEmptyArchive: true
+        }
+    }
+}
+
+
+
+
     }
 }    
