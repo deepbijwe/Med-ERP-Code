@@ -8,7 +8,7 @@ spring:
     name: order-service
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://mwagh:Mayur%40123@cluster0.skpirlm.mongodb.net/order_db?retryWrites=true&w=majority}
+      uri: ${MONGODB_URI:mongodb+srv://deep:deep1234@mongodb.s3pjkaf.mongodb.net/order_db?retryWrites=true&w=majority}
       database: orders_db
   jackson:
     default-property-inclusion: non_null
