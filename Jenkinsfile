@@ -59,43 +59,42 @@ pipeline {
         }
 
         stage("Sonar Quality Gate Scan") {
-             steps {
-               timeout(time: 2, unit: "MINUTES") {
-            waitForQualityGate abortPipeline: false
-                  }
-              }
-         }
+            steps {
+                timeout(time: 2, unit: "MINUTES") {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
 
-
-         stage("OWASP Dependency Check") {
-              steps {
-              withCredentials([
-            string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')
+        stage("OWASP Dependency Check") {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'nvd-api-key',
+                        variable: 'NVD_API_KEY'
+                    )
                 ]) {
-              dependencyCheck(
-                additionalArguments: '--scan ./ --nvdApiKey ' + NVD_API_KEY,
-                odcInstallation: 'OWASP-DC'
-              )
-          }
+                    dependencyCheck(
+                        additionalArguments: '--scan ./ --nvdApiKey ' + NVD_API_KEY,
+                        odcInstallation: 'OWASP-DC'
+                    )
+                }
 
-        dependencyCheckPublisher(
-            pattern: '**/dependency-check-report.xml'
-        )
-          }
-       }
+                dependencyCheckPublisher(
+                    pattern: '**/dependency-check-report.xml'
+                )
+            }
+        }
+
         stage("Trivy FS Scan") {
-    steps {
-        sh '''
-            trivy fs \
-            --severity HIGH,CRITICAL \
-            --exit-code 0 \
-            .
-        '''
-    }
-}
-
-
-
-    
+            steps {
+                sh '''
+                    trivy fs \
+                    --severity HIGH,CRITICAL \
+                    --exit-code 0 \
+                    .
+                '''
+            }
+        }
     }
 }
