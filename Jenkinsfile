@@ -153,7 +153,7 @@ stage('Trivy Image Scan') {
                     '''
                 }
 
-
-
+            }
+        }
     }
 }    
