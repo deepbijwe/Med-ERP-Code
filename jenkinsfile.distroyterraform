@@ -1,0 +1,63 @@
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage("Git Checkout") {
+            steps {
+                git url: "https://github.com/deepbijwe/Med-ERP-Infra.git",
+                    branch: "main"
+            }
+        }
+
+        stage("Terraform Init") {
+            steps {
+                sh '''
+                    terraform init
+                '''
+            }
+        }
+
+        stage("Terraform Validate") {
+            steps {
+                sh '''
+                    terraform validate
+                '''
+            }
+        }
+
+        stage("Terraform Destroy Plan") {
+            steps {
+                sh '''
+                    terraform plan -destroy -out=destroy.tfplan
+                '''
+            }
+        }
+
+        stage("Manual Approval") {
+            steps {
+                input message: "WARNING: This will destroy the MED-ERP infrastructure. Do you want to continue?"
+            }
+        }
+
+        stage("Terraform Destroy") {
+            steps {
+                sh '''
+                    terraform apply destroy.tfplan
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "MED-ERP infrastructure destroyed successfully."
+        }
+
+        failure {
+            echo "Infrastructure destroy pipeline failed. Check the Jenkins console log."
+        }
+    }
+}
+
