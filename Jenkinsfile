@@ -122,13 +122,13 @@ stage('Trivy Image Scan') {
     steps {
         sh '''
             trivy image --severity HIGH,CRITICAL --exit-code 0 --format table \
-                -o trivy-order-service-report.txt deep/order-service:$BUILD_NUMBER
+                -o trivy-order-service-report.txt deep/order:$BUILD_NUMBER
 
             trivy image --severity HIGH,CRITICAL --exit-code 0 --format table \
-                -o trivy-user-service-report.txt deep/user-service:$BUILD_NUMBER
+                -o trivy-user-service-report.txt deep/user:$BUILD_NUMBER
 
             trivy image --severity HIGH,CRITICAL --exit-code 0 --format table \
-                -o trivy-product-service-report.txt deep/product-service:$BUILD_NUMBER
+                -o trivy-product-service-report.txt deep/product:$BUILD_NUMBER
         '''
     }
     post {
