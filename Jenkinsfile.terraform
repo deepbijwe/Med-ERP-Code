@@ -14,22 +14,51 @@ pipeline {
         stage("Terraform init") {
 
             steps {
+                withCredentials ([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+                   
                 sh '''
                 cd Med-ERP-Infra
                 ls 
                 terraform init
                 terraform fmt
                 terraform validate
-                terraform plan 
-                terraform apply -auto-approve
                 '''
+                     }
+                 }
+             }
+
+            stage('Terraform Plan') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+                    sh 'terraform plan -out=tfplan'
+                }
             }
         }
 
+        stage('Approval') {
+            steps {
+                input message: 'Apply this Terraform plan?', ok: 'Apply'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+                    sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
     }
 
-
-
-
-
+    post {
+        success {
+            echo 'Terraform apply completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed — check logs.'
+        }
+    }
 }
+
+    
+
