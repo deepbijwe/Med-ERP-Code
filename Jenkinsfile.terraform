@@ -3,8 +3,7 @@ pipeline {
     stages {
         stage( "Git checkout"){
             steps {
-                 git url: "https://github.com/deepbijwe/Med-ERP-Infra.git" \
-                 git branch: "main"
+                 git url: "https://github.com/deepbijwe/Med-ERP-Infra.git", branch: "main"
 
             }
 
