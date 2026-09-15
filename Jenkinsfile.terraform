@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+    stages {
+        stage( "Git checkout"){
+            steps {
+                 git url: "https://github.com/deepbijwe/Med-ERP-Infra.git" \
+                 git branch: "main"
+
+            }
+
+
+        }
+
+        stage("Terraform init") {
+
+            steps {
+                sh '''
+                cd Med-ERP-Infra
+                ls 
+                terraform init
+                terraform fmt
+                terraform validate
+                terraform plan 
+                terraform apply -auto-approve
+                '''
+            }
+        }
+
+    }
+
+
+
+
+
+}

@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         SONAR_HOME = tool "Sonar"
+        AWS_Region = "ap-south-1"
+        AWS_Account_ID = "360964565562"
     }
 
     stages {
@@ -109,9 +111,9 @@ pipeline {
         stage('Docker Build') {
             steps {
         sh '''
-            docker build -t deep/order-service:$BUILD_NUMBER ./order-service
-            docker build -t deep/user-service:$BUILD_NUMBER ./user-service
-            docker build -t deep/product-service:$BUILD_NUMBER ./product-service
+            docker build -t deep/order:$BUILD_NUMBER ./order-service
+            docker build -t deep/user:$BUILD_NUMBER ./user-service
+            docker build -t deep/product:$BUILD_NUMBER ./product-service
             docker images
         '''
             }
@@ -135,7 +137,21 @@ stage('Trivy Image Scan') {
         }
     }
 }
+            stage('Push Docker Images to ECR') {
+                 steps {
+                     withCredentials ([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+                    sh '''
+                        aws ecr get-login-password --region $AWS_Region | docker login --username AWS --password-stdin $AWS_Account_ID.dkr.ecr.$AWS_Region.amazonaws.com
 
+                        docker tag deep/order:$BUILD_NUMBER $AWS_Account_ID.dkr.ecr.$AWS_Region.amazonaws.com/deep/order:$BUILD_NUMBER
+                        docker tag deep/user:$BUILD_NUMBER $AWS_Account_ID.dkr.ecr.$AWS_Region.amazonaws.com/deep/user:$BUILD_NUMBER
+                        docker tag deep/product:$BUILD_NUMBER $AWS_Account_ID.dkr.ecr.$AWS_Region.amazonaws.com/deep/product:$BUILD_NUMBER
+
+                        docker push $AWS_Account_ID.dkr.ecr.$AWS_Region.amazonaws.com/deep/order:$BUILD_NUMBER
+                        docker push $AWS_Account_ID.dkr.ecr.$AWS_Region.amazonaws.com/deep/user:$BUILD_NUMBER
+                        docker push $AWS_Account_ID.dkr.ecr.$AWS_Region.amazonaws.com/deep/product:$BUILD_NUMBER
+                    '''
+                }
 
 
 
