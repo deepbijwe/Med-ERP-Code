@@ -16,7 +16,6 @@ pipeline {
                 withCredentials ([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
                    
                 sh '''
-                cd Med-ERP-Infra
                 ls 
                 terraform init
                 terraform fmt
