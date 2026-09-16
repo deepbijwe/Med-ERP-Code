@@ -172,13 +172,13 @@ stage('Trivy Image Scan') {
          stage('Update Image Tags') {
             steps {
            sh '''
-            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/order:$IMAGE_TAG|" k8s/deployments/order-deployment.yaml
-            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/user:$IMAGE_TAG|" k8s/deployments/user-deployment.yaml
-            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/product:$IMAGE_TAG|" k8s/deployments/product-deployment.yaml
+            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/order:$IMAGE_TAG|" k8s/deployments/order-service-deployment.yaml
+            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/user:$IMAGE_TAG|" k8s/deployments/user-service-deployment.yaml
+            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/product:$IMAGE_TAG|" k8s/deployments/product-service-deployment.yaml
 
-            cat k8s/deployments/order-deployment.yaml
-            cat k8s/deployments/user-deployment.yaml
-            cat k8s/deployments/product-deployment.yaml
+            cat k8s/deployments/order-service-deployment.yaml
+            cat k8s/deployments/user-service-deployment.yaml
+            cat k8s/deployments/product-service-deployment.yaml
         '''
     }
 }
@@ -209,9 +209,9 @@ stage('Trivy Image Scan') {
                 kubectl apply -f k8s/namespace/namespace.yaml
                 # kubectl apply -f k8s/configmaps/app-config.yaml
                 # kubectl apply -f k8s/secrets/app-secrets.yaml
-                # kubectl apply -f k8s/deployments/order-deployment.yaml
-                # kubectl apply -f k8s/deployments/user-deployment.yaml
-                # kubectl apply -f k8s/deployments/product-deployment.yaml
+                # kubectl apply -f k8s/deployments/order-service-deployment.yaml
+                # kubectl apply -f k8s/deployments/user-service-deployment.yaml
+                # kubectl apply -f k8s/deployments/product-service-deployment.yaml
                 # kubectl apply -f k8s/hpa/hpa.yaml
             '''
         }
