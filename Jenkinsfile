@@ -176,20 +176,20 @@ stage('Trivy Image Scan') {
 
 
         stage('Deploy to EKS') {
-            steps {withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
-                sh '''
-                    kubectl apply -f k8s/namespace/namespace.yaml
-                    // kubectl apply -f k8s/configmaps/app-config.yaml
-                    // kubectl apply -f k8s/secrets/app-secrets.yaml
-                    // kubectl apply -f k8s/deployments/order-deployment.yaml
-                    // kubectl apply -f k8s/deployments/user-deployment.yaml
-                    // kubectl apply -f k8s/deployments/product-deployment.yaml
-                    // kubectl apply -f k8s/hpa/hpa.yaml 
-                '''
-            }
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+            sh '''
+                kubectl apply -f k8s/namespace/namespace.yaml
+                # kubectl apply -f k8s/configmaps/app-config.yaml
+                # kubectl apply -f k8s/secrets/app-secrets.yaml
+                # kubectl apply -f k8s/deployments/order-deployment.yaml
+                # kubectl apply -f k8s/deployments/user-deployment.yaml
+                # kubectl apply -f k8s/deployments/product-deployment.yaml
+                # kubectl apply -f k8s/hpa/hpa.yaml
+            '''
         }
-
-    }   
+    }
+}   
 
 
 
