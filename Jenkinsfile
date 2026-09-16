@@ -157,11 +157,12 @@ stage('Trivy Image Scan') {
 
             }
         }
-        
+
          stage('Configure Kubeconfig') {
     steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
             sh 'aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION'
+            sh 'kubectl get nodes'
         }
     }
 }
