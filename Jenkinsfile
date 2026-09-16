@@ -5,6 +5,8 @@ pipeline {
         SONAR_HOME = tool "Sonar"
         AWS_Region = "ap-south-1"
         AWS_Account_ID = "360964565562"
+        EKS_CLUSTER_NAME = "med-erp-cluster"
+        AWS_DEFAULT_REGION = "ap-south-1"
     }
 
     stages {
@@ -155,5 +157,17 @@ stage('Trivy Image Scan') {
 
             }
         }
+        
+         stage('Configure Kubeconfig') {
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+            sh 'aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION'
+        }
+    }
+}
+
+
+
+
     }
 }    
