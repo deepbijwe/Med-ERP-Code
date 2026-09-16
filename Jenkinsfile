@@ -206,13 +206,16 @@ stage('Trivy Image Scan') {
     steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
             sh '''
-                kubectl apply -f k8s/namespace/namespace.yaml
-                # kubectl apply -f k8s/configmaps/app-config.yaml
-                # kubectl apply -f k8s/secrets/app-secrets.yaml
-                # kubectl apply -f k8s/deployments/order-service-deployment.yaml
-                # kubectl apply -f k8s/deployments/user-service-deployment.yaml
-                # kubectl apply -f k8s/deployments/product-service-deployment.yaml
-                # kubectl apply -f k8s/hpa/hpa.yaml
+                 
+                 kubectl apply -f k8s/namespace/namespace.yaml
+                 kubectl apply -f k8s/configmaps/app-config.yaml
+                 kubectl apply -f k8s/secrets/app-secrets.yaml
+                 kubectl apply -f k8s/deployments/order-service-deployment.yaml
+                 kubectl apply -f k8s/deployments/user-service-deployment.yaml
+                 kubectl apply -f k8s/deployments/product-service-deployment.yaml
+                 kubectl apply -f k8s/hpa/hpa.yaml
+                 kubectl get svc -n ingress-nginx
+                 kubectl apply -f k8s/ingress/ingress.yaml
             '''
         }
     }
