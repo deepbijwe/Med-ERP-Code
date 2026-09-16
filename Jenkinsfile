@@ -7,7 +7,9 @@ pipeline {
         AWS_Account_ID = "360964565562"
         EKS_CLUSTER_NAME = "med-erp-cluster"
         AWS_DEFAULT_REGION = "ap-south-1"
-    }
+        ECR_REGISTRY = "${AWS_Account_ID}.dkr.ecr.${AWS_Region}.amazonaws.com"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }    
 
     stages {
 
@@ -159,7 +161,7 @@ stage('Trivy Image Scan') {
         }
 
          stage('Configure Kubeconfig') {
-    steps {
+          steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
             sh 'aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION'
             sh 'kubectl get nodes'
@@ -167,12 +169,37 @@ stage('Trivy Image Scan') {
     }
 }
 
+         stage('Update Image Tags') {
+            steps {
+           sh '''
+            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/order:$IMAGE_TAG|" k8s/deployments/order-deployment.yaml
+            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/user:$IMAGE_TAG|" k8s/deployments/user-deployment.yaml
+            sed -i "s|image: .*|image: $ECR_REGISTRY/deep/product:$IMAGE_TAG|" k8s/deployments/product-deployment.yaml
+
+            cat k8s/deployments/order-deployment.yaml
+            cat k8s/deployments/user-deployment.yaml
+            cat k8s/deployments/product-deployment.yaml
+        '''
+    }
+}
 
 
 
 
+          stage('Install NGINX Ingress Controller') {
+          steps {
+             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+            sh '''
+                helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+                helm repo update
 
-
+                helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+                    --namespace ingress-nginx \
+                    --create-namespace
+            '''
+        }
+    }
+}
 
 
         stage('Deploy to EKS') {
