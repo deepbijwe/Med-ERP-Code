@@ -1,16 +1,25 @@
 pipeline {
-   agent any
-   stages {
-      stage ("Git Checkout") {
-         steps 
-            git url: ""
-      }
-
-       stage
-
-
-
-   }
-
-
+    agent any
+    stages {
+        stage('Code-Pull') {
+            steps {
+                git branch: 'main', url: "https://github.com/deepbijwe/Med-ERP-Code.git"
+            }
+        }
+        stage('Code-Build') {
+            steps {
+                sh '''
+                    npm install
+                    npm run build
+                '''
+            }
+        }
+        stage('Deploy') {
+            steps {
+                withCredentialswithCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+                    sh 'aws s3 sync dist/ s3://med-erp-static-web/'
+                }
+            }
+        }
+    }
 }
