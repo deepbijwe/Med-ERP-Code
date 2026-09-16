@@ -215,6 +215,7 @@ stage('Trivy Image Scan') {
                  kubectl apply -f k8s/deployments/product-service-deployment.yaml
                  kubectl apply -f k8s/hpa/hpa.yaml
                  kubectl get svc -n ingress-nginx
+                 kubectl get service --namespace ingress-nginx ingress-nginx-controller
                  kubectl apply -f k8s/ingress/ingress.yaml
             '''
         }
