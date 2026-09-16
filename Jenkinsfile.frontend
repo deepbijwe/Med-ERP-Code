@@ -1,6 +1,16 @@
 pipeline {
    agent any
-   stages
+   stages {
+      stage ("Git Checkout") {
+         steps 
+            git url: ""
+      }
+
+       stage
+
+
+
+   }
 
 
 }
