@@ -166,16 +166,25 @@ stage('Trivy Image Scan') {
         }
     }
 }
+
+
+
+
+
+
+
+
+
         stage('Deploy to EKS') {
             steps {
                 sh '''
-                    kubectl apply -f k8s/namespace.yaml
-                    kubectl apply -f k8s/app-config.yaml
-                    kubectl apply -f k8s/app-secrets.yaml
-                    kubectl apply -f k8s/order-deployment.yaml
-                    kubectl apply -f k8s/user-deployment.yaml
-                    kubectl apply -f k8s/product-deployment.yaml
-                    kubectl apply -f k8s/hpa.yaml
+                    kubectl apply -f k8s/namespace/namespace.yaml
+                    // kubectl apply -f k8s/configmaps/app-config.yaml
+                    // kubectl apply -f k8s/secrets/app-secrets.yaml
+                    // kubectl apply -f k8s/deployments/order-deployment.yaml
+                    // kubectl apply -f k8s/deployments/user-deployment.yaml
+                    // kubectl apply -f k8s/deployments/product-deployment.yaml
+                    // kubectl apply -f k8s/hpa/hpa.yaml 
                 '''
             }
         }
