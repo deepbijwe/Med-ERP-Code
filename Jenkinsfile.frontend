@@ -8,16 +8,20 @@ pipeline {
         }
         stage('Code-Build') {
             steps {
-                sh '''
-                    npm install
-                    npm run build
-                '''
+                dir('frontend') {
+                    sh '''
+                        npm install
+                        npm run build
+                    '''
+                }
             }
         }
         stage('Deploy') {
             steps {
-                withCredentialswithCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
-                    sh 'aws s3 sync dist/ s3://med-erp-static-web/'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Creds']]) {
+                    dir('frontend') {
+                        sh 'aws s3 sync dist/ s3://med-erp-static-web/'
+                    }
                 }
             }
         }
