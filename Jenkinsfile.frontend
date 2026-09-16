@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Code-Pull') {
             steps {
-                git branch: 'main', url: "https://github.com/deepbijwe/Med-ERP-Code.git"
+                git branch: 'dev', url: "https://github.com/deepbijwe/Med-ERP-Code.git"
             }
         }
         stage('Code-Build') {
