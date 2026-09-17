@@ -11,13 +11,22 @@ pipeline {
             }
         }
 
-        stage("Terraform Init") {
-            steps {
-                sh '''
-                    terraform init
-                '''
-            }
-        }
+        stage("Check Terraform Files") {
+    steps {
+        sh '''
+            echo "Current directory:"
+            pwd
+
+            echo ""
+            echo "Files:"
+            ls -la
+
+            echo ""
+            echo "Terraform files:"
+            find . -maxdepth 3 -type f \\( -name "*.tf" -o -name "*.tfvars" \\) -print
+        '''
+    }
+}
 
         stage("Terraform Validate") {
             steps {
