@@ -7,7 +7,7 @@ pipeline {
         stage("Git Checkout") {
             steps {
                 git url: "https://github.com/deepbijwe/Med-ERP-Infra.git",
-                    branch: "main"
+                    branch: "dev"
             }
         }
 
