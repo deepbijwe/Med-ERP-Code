@@ -220,6 +220,7 @@ stage('Trivy Image Scan') {
                  kubectl apply -f k8s/ingress/ingressrule.yaml
                  kubectl get pods -n med-erp
                  kubectl get deploy -n med-erp
+                 kubectl get svc -n med-erp
                 
             '''
         }
